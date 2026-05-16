@@ -12,10 +12,10 @@ export function RegistrationForm({ onAdd }: RegistrationFormProps) {
     nik: "",
     name: "",
     age: "",
-    rt: "",
-    rw: "",
+    address: "",
+    testCount: "1",
+    lastTestDate: "",
     kelurahan: "" as KelurahanName | "",
-    status: "Belum" as ResidentData["status"],
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -29,10 +29,10 @@ export function RegistrationForm({ onAdd }: RegistrationFormProps) {
       nik: formData.nik,
       name: formData.name,
       age: parseInt(formData.age),
-      rt: formData.rt,
-      rw: formData.rw,
+      address: formData.address,
+      testCount: parseInt(formData.testCount) || 0,
+      lastTestDate: formData.lastTestDate,
       kelurahan: formData.kelurahan as KelurahanName,
-      status: formData.status,
       lat: kelurahanData.lat,
       lng: kelurahanData.lng,
     });
@@ -41,10 +41,10 @@ export function RegistrationForm({ onAdd }: RegistrationFormProps) {
       nik: "",
       name: "",
       age: "",
-      rt: "",
-      rw: "",
+      address: "",
+      testCount: "1",
+      lastTestDate: "",
       kelurahan: "",
-      status: "Belum",
     });
   };
 
@@ -53,19 +53,31 @@ export function RegistrationForm({ onAdd }: RegistrationFormProps) {
 
   return (
     <div className="card p-6">
-      <h3 className="text-lg font-medium text-slate-900 mb-4">Tambah Data Peserta</h3>
+      <h3 className="text-lg font-medium text-slate-900 mb-4">Input / Perbarui Data</h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className={labelClasses}>NIK (16 Digit)</label>
-          <input
-            required
-            maxLength={16}
-            type="text"
-            className={inputClasses}
-            value={formData.nik}
-            onChange={(e) => setFormData({ ...formData, nik: e.target.value.replace(/\D/g, '') })}
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={labelClasses}>NIK (16 Digit)</label>
+            <input
+              required
+              maxLength={16}
+              type="text"
+              className={inputClasses}
+              value={formData.nik}
+              onChange={(e) => setFormData({ ...formData, nik: e.target.value.replace(/\D/g, '') })}
+            />
+          </div>
+          <div>
+            <label className={labelClasses}>Usia</label>
+            <input
+              required
+              type="number"
+              className={inputClasses}
+              value={formData.age}
+              onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+            />
+          </div>
         </div>
 
         <div>
@@ -79,37 +91,15 @@ export function RegistrationForm({ onAdd }: RegistrationFormProps) {
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-1">
-            <label className={labelClasses}>Usia</label>
-            <input
-              required
-              type="number"
-              className={inputClasses}
-              value={formData.age}
-              onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className={labelClasses}>RT</label>
-            <input
-              required
-              type="text"
-              className={inputClasses}
-              value={formData.rt}
-              onChange={(e) => setFormData({ ...formData, rt: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className={labelClasses}>RW</label>
-            <input
-              required
-              type="text"
-              className={inputClasses}
-              value={formData.rw}
-              onChange={(e) => setFormData({ ...formData, rw: e.target.value })}
-            />
-          </div>
+        <div>
+          <label className={labelClasses}>Alamat Lengkap</label>
+          <input
+            required
+            type="text"
+            className={inputClasses}
+            value={formData.address}
+            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -128,17 +118,26 @@ export function RegistrationForm({ onAdd }: RegistrationFormProps) {
             </select>
           </div>
           <div>
-            <label className={labelClasses}>Status</label>
-            <select
-              required
+            <label className={labelClasses}>Tanggal Test Terakhir</label>
+            <input
+              type="date"
               className={inputClasses}
-              value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as ResidentData["status"] })}
-            >
-              <option value="Belum">Belum</option>
-              <option value="Selesai">Selesai</option>
-            </select>
+              value={formData.lastTestDate}
+              onChange={(e) => setFormData({ ...formData, lastTestDate: e.target.value })}
+            />
           </div>
+        </div>
+
+        <div>
+          <label className={labelClasses}>Jumlah Test (Total)</label>
+          <input
+            required
+            type="number"
+            min={0}
+            className={inputClasses}
+            value={formData.testCount}
+            onChange={(e) => setFormData({ ...formData, testCount: e.target.value })}
+          />
         </div>
 
         <div className="pt-2">

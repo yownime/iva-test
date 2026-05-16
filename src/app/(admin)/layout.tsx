@@ -1,5 +1,6 @@
 import { Navigation } from "@/components/Navigation";
 import Link from "next/link";
+import { UserButton } from "@clerk/nextjs";
 
 export default function AdminLayout({
   children,
@@ -31,12 +32,7 @@ export default function AdminLayout({
                 Ke Beranda Publik
               </Link>
               <div className="w-px h-6 bg-slate-200 hidden sm:block"></div>
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-slate-900">Admin PKK</p>
-              </div>
-              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-medium text-sm border border-slate-200">
-                A
-              </div>
+              <UserButton />
             </div>
           </div>
         </div>

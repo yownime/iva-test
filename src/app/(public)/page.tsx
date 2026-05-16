@@ -1,13 +1,36 @@
-"use client";
-
 import { InteractiveMap } from "@/components/InteractiveMap";
-import { MOCK_DATA } from "@/lib/constants";
 import { ShieldCheck, Users, Info, HeartPulse, CheckCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { getResidents } from "@/app/actions";
+import { ResidentData } from "@/lib/constants";
+import { auth } from "@clerk/nextjs/server";
+import { SignInButton } from "@clerk/nextjs";
 
-export default function LandingPage() {
-  const totalWUS = MOCK_DATA.length;
-  const sudahIVA = MOCK_DATA.filter((item) => item.status === "Selesai").length;
+export default async function LandingPage() {
+  const { userId } = await auth();
+  const dbData = await getResidents();
+  
+  const residents: ResidentData[] = dbData.map((r) => ({
+    ...r,
+    kelurahan: r.kelurahan as any,
+    lastTestDate: r.lastTestDate || "",
+    lat: parseFloat(r.lat),
+    lng: parseFloat(r.lng),
+    createdAt: r.createdAt.toISOString(),
+  }));
+
+  const totalWUS = residents.length;
+  
+  const today = new Date();
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(today.getMonth() - 6);
+
+  const sudahIVA = residents.filter((item) => {
+    if (!item.lastTestDate) return false;
+    const lastDate = new Date(item.lastTestDate);
+    return lastDate >= sixMonthsAgo && lastDate <= today;
+  }).length;
+
   const persentase = totalWUS > 0 ? Math.round((sudahIVA / totalWUS) * 100) : 0;
 
   return (
@@ -174,9 +197,8 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="p-2 bg-slate-100">
-              {/* InteractiveMap in read-only mode */}
               <div className="pointer-events-auto rounded-xl overflow-hidden border border-slate-200">
-                <InteractiveMap data={MOCK_DATA} />
+                <InteractiveMap data={residents} />
               </div>
             </div>
           </div>
@@ -215,9 +237,17 @@ export default function LandingPage() {
           <p className="text-lg text-slate-400 mb-10 leading-relaxed">
             Jika Anda adalah petugas atau Kader PKK yang bertugas mendata dan memantau program IVA di kelurahan Anda, silakan masuk ke sistem manajemen.
           </p>
-          <Link href="/dashboard" className="inline-flex justify-center items-center px-8 py-4 border border-transparent text-lg font-bold rounded-lg text-slate-900 bg-emerald-400 hover:bg-emerald-300 transition-colors shadow-lg shadow-emerald-900/50">
-            Login ke Dashboard Admin
-          </Link>
+          {userId ? (
+            <Link href="/dashboard" className="inline-flex justify-center items-center px-8 py-4 border border-transparent text-lg font-bold rounded-lg text-slate-900 bg-emerald-400 hover:bg-emerald-300 transition-colors shadow-lg shadow-emerald-900/50">
+              Masuk ke Dashboard
+            </Link>
+          ) : (
+            <SignInButton mode="modal">
+              <button className="inline-flex justify-center items-center px-8 py-4 border border-transparent text-lg font-bold rounded-lg text-slate-900 bg-emerald-400 hover:bg-emerald-300 transition-colors shadow-lg shadow-emerald-900/50">
+                Login ke Dashboard Admin
+              </button>
+            </SignInButton>
+          )}
         </div>
       </section>
     </div>

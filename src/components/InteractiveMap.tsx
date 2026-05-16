@@ -47,8 +47,17 @@ export function InteractiveMap({ data }: InteractiveMapProps) {
   };
 
   const kelurahanStats = KELURAHANS.map((k) => {
+    const today = new Date();
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(today.getMonth() - 6);
+
     const residentsInKel = data.filter((r) => r.kelurahan === k.name);
-    const completed = residentsInKel.filter((r) => r.status === "Selesai").length;
+    const completed = residentsInKel.filter((r) => {
+      if (!r.lastTestDate) return false;
+      const lastDate = new Date(r.lastTestDate);
+      return lastDate >= sixMonthsAgo && lastDate <= today;
+    }).length;
+    
     const total = residentsInKel.length;
     const percentage = total > 0 ? (completed / total) * 100 : 0;
 

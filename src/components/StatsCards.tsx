@@ -3,10 +3,10 @@ import { Users, CheckCircle2, AlertCircle } from "lucide-react";
 interface StatsCardsProps {
   totalWUS: number;
   sudahIVA: number;
-  belumIVA: number;
+  jatuhTempo: number;
 }
 
-export function StatsCards({ totalWUS, sudahIVA, belumIVA }: StatsCardsProps) {
+export function StatsCards({ totalWUS, sudahIVA, jatuhTempo }: StatsCardsProps) {
   const stats = [
     {
       label: "Total WUS",
@@ -16,15 +16,15 @@ export function StatsCards({ totalWUS, sudahIVA, belumIVA }: StatsCardsProps) {
       bg: "bg-slate-100",
     },
     {
-      label: "Sudah IVA",
+      label: "Status Aman",
       value: sudahIVA,
       icon: CheckCircle2,
       color: "text-emerald-600",
       bg: "bg-emerald-50",
     },
     {
-      label: "Belum IVA",
-      value: belumIVA,
+      label: "Wajib Test Ulang",
+      value: jatuhTempo,
       icon: AlertCircle,
       color: "text-rose-600",
       bg: "bg-rose-50",

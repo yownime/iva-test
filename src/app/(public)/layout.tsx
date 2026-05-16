@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { auth } from "@clerk/nextjs/server";
 
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { userId } = await auth();
+
   return (
     <div className="min-h-screen flex flex-col bg-white text-slate-600">
       <header className="border-b border-slate-100 bg-white sticky top-0 z-50">
@@ -25,12 +28,22 @@ export default function PublicLayout({
             <nav className="hidden md:flex gap-8 items-center">
               <a href="#tentang" className="text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors">Tentang Program</a>
               <a href="#statistik" className="text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors">Data Publik</a>
-              <Link 
-                href="/dashboard" 
-                className="text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 px-5 py-2.5 rounded-full transition-colors shadow-sm"
-              >
-                Login Kader PKK
-              </Link>
+              
+              {userId ? (
+                <Link 
+                  href="/dashboard" 
+                  className="text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-5 py-2.5 rounded-full transition-colors shadow-sm"
+                >
+                  Ke Dashboard Admin
+                </Link>
+              ) : (
+                <Link 
+                  href="/sign-in" 
+                  className="text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 px-5 py-2.5 rounded-full transition-colors shadow-sm"
+                >
+                  Login Kader PKK
+                </Link>
+              )}
             </nav>
           </div>
         </div>

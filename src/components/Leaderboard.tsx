@@ -8,22 +8,31 @@ interface LeaderboardProps {
 }
 
 export function Leaderboard({ data }: LeaderboardProps) {
-  // Group by RT/Kelurahan for competition
-  const rtStats = data.reduce((acc, item) => {
-    const key = `${item.kelurahan} - RT ${item.rt}`;
+  // Group by Kelurahan for competition
+  const kelStats = data.reduce((acc, item) => {
+    const key = item.kelurahan;
     if (!acc[key]) acc[key] = { name: key, total: 0, completed: 0 };
     acc[key].total += 1;
-    if (item.status === "Selesai") acc[key].completed += 1;
+    const today = new Date();
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(today.getMonth() - 6);
+
+    if (item.lastTestDate) {
+      const lastDate = new Date(item.lastTestDate);
+      if (lastDate >= sixMonthsAgo && lastDate <= today) {
+        acc[key].completed += 1;
+      }
+    }
     return acc;
   }, {} as Record<string, { name: string; total: number; completed: number }>);
 
-  const sortedStats = Object.values(rtStats)
+  const sortedStats = Object.values(kelStats)
     .sort((a, b) => b.completed - a.completed)
     .slice(0, 5);
 
   return (
     <div className="card p-6">
-      <h3 className="text-lg font-medium text-slate-900 mb-4">Top Cakupan RT</h3>
+      <h3 className="text-lg font-medium text-slate-900 mb-4">Top Cakupan Kelurahan</h3>
 
       <div className="space-y-4">
         {sortedStats.map((stat, index) => {

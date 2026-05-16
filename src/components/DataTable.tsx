@@ -3,14 +3,15 @@
 import { useState } from "react";
 import { ResidentData, KELURAHANS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { Search, Filter, Download } from "lucide-react";
+import { Search, Filter, Download, RefreshCw, Trash2 } from "lucide-react";
 
 interface DataTableProps {
   data: ResidentData[];
-  onDelete?: (id: string) => void;
+  onDelete?: (id: number) => void;
+  onUpdateTest?: (id: number) => void;
 }
 
-export function DataTable({ data, onDelete }: DataTableProps) {
+export function DataTable({ data, onDelete, onUpdateTest }: DataTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterKel, setFilterKel] = useState("");
 
@@ -23,9 +24,9 @@ export function DataTable({ data, onDelete }: DataTableProps) {
   });
 
   const exportToCSV = () => {
-    const headers = ["NIK,Nama,Usia,RT,RW,Kelurahan,Status,Tanggal"];
+    const headers = ["NIK,Nama,Usia,Alamat,Kelurahan,Test_Ke,Status,Tanggal"];
     const rows = filteredData.map((r) => 
-      `${r.nik},${r.name},${r.age},${r.rt},${r.rw},${r.kelurahan},${r.status},${r.createdAt}`
+      `${r.nik},${r.name},${r.age},${r.address},${r.kelurahan},${r.testCount},${getStatusInfo(r.lastTestDate).label},${r.createdAt}`
     );
     const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join("\n");
     const encodedUri = encodeURI(csvContent);
@@ -37,15 +38,28 @@ export function DataTable({ data, onDelete }: DataTableProps) {
     document.body.removeChild(link);
   };
 
-  const getStatusBadge = (status: ResidentData["status"]) => {
-    const styles = {
-      Selesai: "bg-emerald-100 text-emerald-700",
-      Terjadwal: "bg-blue-100 text-blue-700",
-      Belum: "bg-slate-100 text-slate-700",
-    };
+  const getStatusInfo = (lastTestDate: string) => {
+    if (!lastTestDate) return { label: "Belum Pernah", color: "bg-slate-100 text-slate-700" };
+    
+    const today = new Date();
+    const lastDate = new Date(lastTestDate);
+    
+    if (lastDate > today) return { label: "Terjadwal", color: "bg-blue-100 text-blue-700" };
+    
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(today.getMonth() - 6);
+    
+    const isOverdue = lastDate < sixMonthsAgo;
+    
+    if (isOverdue) return { label: "Jatuh Tempo", color: "bg-rose-100 text-rose-700" };
+    return { label: "Aman", color: "bg-emerald-100 text-emerald-700" };
+  };
+
+  const getStatusBadge = (lastTestDate: string) => {
+    const { label, color } = getStatusInfo(lastTestDate);
     return (
-      <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium", styles[status])}>
-        {status}
+      <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium", color)}>
+        {label}
       </span>
     );
   };
@@ -95,6 +109,7 @@ export function DataTable({ data, onDelete }: DataTableProps) {
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">NIK / Nama</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Usia</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Wilayah</th>
+              <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Riwayat Test</th>
               <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
               <th scope="col" className="relative px-4 py-3"><span className="sr-only">Aksi</span></th>
             </tr>
@@ -111,20 +126,44 @@ export function DataTable({ data, onDelete }: DataTableProps) {
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="text-sm text-slate-900">{item.kelurahan}</div>
-                  <div className="text-sm text-slate-500">RT {item.rt} / RW {item.rw}</div>
+                  <div className="text-sm text-slate-500">{item.address}</div>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  {getStatusBadge(item.status)}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-slate-900">{item.testCount}x</span>
+                    <span className="text-xs text-slate-500">Pemeriksaan</span>
+                  </div>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  {getStatusBadge(item.lastTestDate)}
+                  {item.lastTestDate && (
+                    <div className="text-[10px] text-slate-400 mt-1">
+                      {new Date(item.lastTestDate).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' })}
+                    </div>
+                  )}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
-                  {onDelete && (
-                    <button 
-                      onClick={() => onDelete(item.id)}
-                      className="text-rose-600 hover:text-rose-900"
-                    >
-                      Hapus
-                    </button>
-                  )}
+                  <div className="flex justify-end gap-2">
+                    {onUpdateTest && (
+                      <button 
+                        onClick={() => onUpdateTest(item.id)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all duration-200"
+                        title="Klik jika sudah test hari ini"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        TEST IVA
+                      </button>
+                    )}
+                    {onDelete && (
+                      <button 
+                        onClick={() => onDelete(item.id)}
+                        className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                        title="Hapus Data"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
