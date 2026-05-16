@@ -42,11 +42,10 @@ export function LaporanClient({ data }: LaporanClientProps) {
     { name: "50+", count: data.filter(r => r.age > 50).length },
   ].filter(g => g.count > 0);
 
-  // 3. Recent Activity
+  // 3. Recent Activity (Sorted by latest registration/update)
   const recentActivity = [...data]
-    .filter(r => r.lastTestDate)
-    .sort((a, b) => new Date(b.lastTestDate).getTime() - new Date(a.lastTestDate).getTime())
-    .slice(0, 4);
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5);
 
   // 4. Executive Summary Logic
   const kelScores = chartData.map(k => ({
@@ -194,25 +193,40 @@ export function LaporanClient({ data }: LaporanClientProps) {
           <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full uppercase tracking-tighter">Real-time Feed</span>
         </div>
         <div className="divide-y divide-slate-100">
-          {recentActivity.map((activity) => (
-            <div key={activity.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
-                  <Activity className="w-5 h-5" />
+          {recentActivity.map((activity) => {
+            const lastDate = activity.lastTestDate ? new Date(activity.lastTestDate) : null;
+            const isCompleted = lastDate && lastDate >= sixMonthsAgo;
+            const isDue = lastDate && lastDate < sixMonthsAgo;
+            
+            return (
+              <div key={activity.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                <div className="flex items-center gap-4">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    isCompleted ? 'bg-emerald-100 text-emerald-600' : 
+                    isDue ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    <Activity className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-900">{activity.name}</p>
+                    <p className="text-xs text-slate-500">{activity.kelurahan} • NIK: {activity.nik.slice(0, 4)}***</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-900">{activity.name}</p>
-                  <p className="text-xs text-slate-500">{activity.kelurahan} • NIK: {activity.nik.slice(0, 4)}***</p>
+                <div className="text-right">
+                  {isCompleted ? (
+                    <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">SELESAI TEST</span>
+                  ) : isDue ? (
+                    <span className="text-[10px] font-black text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">JATUH TEMPO</span>
+                  ) : (
+                    <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">BARU TERDAFTAR</span>
+                  )}
+                  <p className="text-[10px] text-slate-400 mt-1 uppercase">
+                    {new Date(activity.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                  </p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-xs font-black text-emerald-600">BERHASIL TEST</p>
-                <p className="text-[10px] text-slate-400">
-                  {new Date(activity.lastTestDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-                </p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
           {recentActivity.length === 0 && (
             <div className="p-8 text-center text-slate-500 text-sm">Belum ada aktivitas test terbaru.</div>
           )}

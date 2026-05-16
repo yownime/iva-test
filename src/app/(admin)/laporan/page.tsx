@@ -1,6 +1,7 @@
 import { getResidents } from "@/app/actions";
 import { LaporanClient } from "./LaporanClient";
 import { ResidentData } from "@/lib/constants";
+export const dynamic = "force-dynamic";
 
 export default async function Laporan() {
   const dbData = await getResidents();

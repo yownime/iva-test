@@ -29,7 +29,7 @@ export async function addResident(data: any) {
       lat: data.lat.toString(),
       lng: data.lng.toString(),
     });
-    revalidatePath("/dashboard");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to add resident:", error);
@@ -42,7 +42,7 @@ export async function updateResidentTest(id: number, testCount: number, lastTest
     await db.update(residents)
       .set({ testCount, lastTestDate })
       .where(eq(residents.id, id));
-    revalidatePath("/dashboard");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to update resident:", error);
@@ -65,7 +65,7 @@ export async function seedResidents(data: any[]) {
         lng: item.lng.toString(),
       }).onConflictDoNothing();
     }
-    revalidatePath("/dashboard");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to seed residents:", error);
@@ -76,7 +76,7 @@ export async function seedResidents(data: any[]) {
 export async function deleteResident(id: number) {
   try {
     await db.delete(residents).where(eq(residents.id, id));
-    revalidatePath("/dashboard");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete resident:", error);
