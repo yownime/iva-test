@@ -26,6 +26,7 @@ export async function addResident(data: any) {
       kelurahan: data.kelurahan,
       testCount: data.testCount,
       lastTestDate: data.lastTestDate,
+      hasilTest: data.hasilTest,
       lat: data.lat.toString(),
       lng: data.lng.toString(),
     });
@@ -37,10 +38,10 @@ export async function addResident(data: any) {
   }
 }
 
-export async function updateResidentTest(id: number, testCount: number, lastTestDate: string) {
+export async function updateResidentTest(id: number, testCount: number, lastTestDate: string, hasilTest: string) {
   try {
     await db.update(residents)
-      .set({ testCount, lastTestDate })
+      .set({ testCount, lastTestDate, hasilTest })
       .where(eq(residents.id, id));
     revalidatePath("/", "layout");
     return { success: true };

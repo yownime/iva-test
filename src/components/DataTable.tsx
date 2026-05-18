@@ -129,9 +129,16 @@ export function DataTable({ data, onDelete, onUpdateTest }: DataTableProps) {
                   <div className="text-sm text-slate-500">{item.address}</div>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-slate-900">{item.testCount}x</span>
-                    <span className="text-xs text-slate-500">Pemeriksaan</span>
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-slate-900">{item.testCount}x</span>
+                      <span className="text-xs text-slate-500">Pemeriksaan</span>
+                    </div>
+                    {item.hasilTest && (
+                      <span className="text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded w-fit">
+                        Hasil: {item.hasilTest}
+                      </span>
+                    )}
                   </div>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">

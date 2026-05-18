@@ -17,6 +17,7 @@ export interface ResidentData {
   kelurahan: KelurahanName;
   testCount: number;
   lastTestDate: string; // ISO Date String
+  hasilTest?: string | null;
   lat: number;
   lng: number;
   createdAt: string;

@@ -9,6 +9,7 @@ export const residents = pgTable("residents", {
   kelurahan: text("kelurahan").notNull(),
   testCount: integer("test_count").default(0).notNull(),
   lastTestDate: text("last_test_date"), // YYYY-MM-DD
+  hasilTest: text("hasil_test"), // e.g. Negatif, Positif
   lat: numeric("lat").notNull(),
   lng: numeric("lng").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

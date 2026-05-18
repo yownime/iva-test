@@ -24,6 +24,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
     title: string;
     message: string;
   }>({ isOpen: false, type: "delete", title: "", message: "" });
+  const [hasilTestInput, setHasilTestInput] = useState("");
 
   const handleSeed = async () => {
     const res = await seedResidents(MOCK_DATA);
@@ -56,19 +57,24 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
   };
 
   const executeUpdateTest = async (id: number) => {
+    if (!hasilTestInput) {
+      toast.error("Silakan pilih hasil test terlebih dahulu.");
+      return;
+    }
     const todayStr = new Date().toISOString().split("T")[0];
     const resident = data.find(r => r.id === id);
     if (!resident) return;
 
     const newCount = resident.testCount + 1;
-    const res = await updateResidentTest(id, newCount, todayStr);
+    const res = await updateResidentTest(id, newCount, todayStr, hasilTestInput);
     if (res.success) {
       setData(data.map((item) => 
         item.id === id 
-          ? { ...item, testCount: newCount, lastTestDate: todayStr }
+          ? { ...item, testCount: newCount, lastTestDate: todayStr, hasilTest: hasilTestInput }
           : item
       ));
       toast.success(`IVA Test berhasil diperbarui untuk ${resident.name}`);
+      setHasilTestInput("");
     } else {
       toast.error("Gagal memperbarui data test.");
     }
@@ -84,6 +90,7 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         message: `Apakah Anda yakin ingin menghapus data ${name || 'warga ini'}? Tindakan ini tidak dapat dibatalkan.`
       });
     } else if (type === "test" && id) {
+      setHasilTestInput("");
       setModalConfig({
         isOpen: true,
         type: "test",
@@ -179,7 +186,25 @@ export function DashboardClient({ initialData }: DashboardClientProps) {
         message={modalConfig.message}
         variant={modalConfig.type === "delete" ? "danger" : "success"}
         confirmText={modalConfig.type === "delete" ? "Hapus Sekarang" : "Konfirmasi"}
-      />
+      >
+        {modalConfig.type === "test" && (
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-slate-700 mb-1">Hasil Test</label>
+            <select
+              required
+              className="w-full rounded-md border border-slate-300 py-2 px-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 bg-white"
+              value={hasilTestInput}
+              onChange={(e) => setHasilTestInput(e.target.value)}
+            >
+              <option value="">Pilih Hasil...</option>
+              <option value="Negatif">Negatif</option>
+              <option value="Positif">Positif</option>
+              <option value="Radang">Radang</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+        )}
+      </ConfirmModal>
     </div>
   );
 }
